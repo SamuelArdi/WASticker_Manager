@@ -1,16 +1,71 @@
-import ctypes, os, sys
+import flet as ft
 
-libname = "native.dll" if sys.platform == "win32" else "libnative.so"
-lib = ctypes.CDLL(os.path.join(os.path.dirname(os.path.abspath(__file__)), libname))
+PRODUCTS = [
+  {"name": "Desk Lamp", "price": "$24", "on_sale": False},
+  {"name": "Wireless Mouse", "price": "$18", "on_sale": True},
+  {"name": "Notebook", "price": "$6", "on_sale": False},
+]
 
-lib.add.argtypes = [ctypes.c_int, ctypes.c_int]
-lib.add.restype = ctypes.c_int
+def main(page: ft.Page):
+  page.title = "Catalog"
+  page.appbar = ft.AppBar(title=ft.Text("Catalog"), center_title=True)
 
-lib.greet.argtypes = [ctypes.c_char_p]
-lib.greet.restype = ctypes.c_char_p
+  def add_to_cart(product_name: str):
+    def handle_click(e: ft.Event[ft.Button]):
+      page.show_dialog(ft.SnackBar(ft.Text(f"Added {product_name} to cart")))
 
-assert lib.add(2, 3) == 5
-assert lib.greet(b"hello") == b"Hello, hello"
-assert lib.greet(b"world") == b"Hello, world"
+    return handle_click
 
-print("OK")
+  def product_card(product: dict) -> ft.Control:
+    # the main card
+    card = ft.Container(
+      padding=12,
+      border_radius=8,
+      bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+
+      # contents inside of card
+      content=ft.Row(
+        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+        controls=[
+          # name and price
+          ft.Column(
+            spacing=2,
+            controls=[
+              ft.Text(product["name"], weight=ft.FontWeight.BOLD),
+              ft.Text(product["price"], color=ft.Colors.OUTLINE),
+            ],
+          ),
+
+          # buy button
+          ft.Button("Buy", on_click=add_to_cart(product["name"]))
+        ]
+      )
+    )
+
+    if not product["on_sale"]:
+      return card
+    return ft.Stack(
+      clip_behavior=ft.ClipBehavior.NONE,
+      controls=[
+        card,
+        ft.Container(
+          content=ft.Text("SALE", size=10, color=ft.Colors.WHITE),
+          bgcolor=ft.Colors.RED,
+          padding=ft.Padding.symmetric(horizontal=6, vertical=2),
+          border_radius=4,
+          top=-6,
+          right=-6,
+        ),
+      ],
+    )
+
+  page.add(
+    ft.Column(
+      spacing=10,
+      controls=[product_card(product) for product in PRODUCTS],
+    ),
+  )
+
+if __name__ == "__main__":
+  ft.run(main)
+
