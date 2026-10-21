@@ -1,0 +1,27 @@
+{
+  "pack0": {
+    "icon": "Icon Path",
+    "author": "Author",
+    "date_accessed": "Last Date",
+    "stickers": [
+      "packName_id",
+      "packName_id",
+      "packName_id",
+      "packName_id",
+      "packName_id"
+    ]
+  },
+
+  "pack1": {
+    "icon": "Icon Path",
+    "author": "Author",
+    "date_accessed": "Last Date",
+    "stickers": [
+      "packName_id",
+      "packName_id",
+      "packName_id",
+      "packName_id",
+      "packName_id"
+    ]
+  }
+}
