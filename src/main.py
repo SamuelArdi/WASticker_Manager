@@ -8,6 +8,8 @@ def main(page: ft.Page):
 
   page.floating_action_button = ft.FloatingActionButton(
     icon=ft.Icons.ADD,
+    foreground_color=wac.TEA_GREEN,
+    bgcolor=wac.WA_LIGHT_GREEN
   )
 
   # topbar
