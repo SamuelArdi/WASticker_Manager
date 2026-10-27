@@ -2,14 +2,52 @@ from backend import lib
 import colors as wac
 
 import flet as ft
+from datetime import datetime
+import locale
+
+locale.setlocale(locale.LC_TIME, "") # set time to user's locale time
+
+#NOTE: todo tomorrow:
+# - add apply button
+# - add new screen to edit the packs
 
 # TODO: save and load implementation
+# NOTE: possibly do this in C++ so it gets executed faster
 packs: list[dict] = []
 def save_packs():
   return
 
 def load_packs():
   return
+
+class FormatDate:
+  WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednedsay", "Thursday", "Friday", "Saturday", "Saturday", "Sunday")
+  MONTH_NAMES = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+  def __init__(self, then: datetime, now: datetime | None = None, *, weekday_cutoff: int = 6) -> None:
+    self.now = self._local_aware(now or datetime.now())
+    self.then = self._local_aware(then)
+    self.days = (self.now.date() - self.then.date()).days
+    self.weekday_cutoff = weekday_cutoff
+
+  def label(self) -> str:
+    if self.days < 0:
+      return "Just Now"
+    if self.days == 0:
+      return self._format_time(self.then)
+    if self.days == 1:
+      return "Yesterday"
+    if self.days <= self.weekday_cutoff:
+      return self.WEEKDAY_NAMES[self.then.weekday()]
+    if self.then.year == self.now.year:
+      return f"{self.MONTH_NAMES[self.then.month - 1]} {self.then.day}"
+    return f"{self.MONTH_NAMES[self.then.month - 1]} {self.then.day}, {self.then.year}"
+
+  def _local_aware(self, dt: datetime) -> datetime:
+    return dt.astimezone()
+
+  def _format_time(self, dt: datetime) -> str:
+    return f"{dt.hour:02d}:{dt.minute:02d}"
 
 class AppMain():
   def __init__(self, page: ft.Page):
@@ -25,15 +63,16 @@ class AppMain():
     self.page.window.resizable = False
     self.page.window.maximizable = False
 
-    # add pack
+    # add pack button
     self.page.floating_action_button = ft.FloatingActionButton(
       icon=ft.Icons.ADD,
       foreground_color=wac.TEA_GREEN,
       bgcolor=wac.WA_LIGHT_GREEN,
-      content="Create Pack",
+      content=ft.Text("Create Pack"),
       on_click=self.create_pack
     )
 
+    # topbar
     self. page.appbar = ft.AppBar(
       title=ft.Text("Sticker Packs", color=wac.TEA_GREEN),
       leading=ft.IconButton(ft.Icons.MENU, icon_color=wac.TEA_GREEN),
@@ -60,25 +99,32 @@ class AppMain():
       padding=10,
       border_radius=8,
       bgcolor=wac.LIGHT_NUDE,
-      content=ft.Row(
-        controls=[
-
+      content=ft.Row([
+        ft.Row([
           # icon
           (
             ft.Image(src=pack["cover"], width=48, height=48, fit=ft.BoxFit.COVER, border_radius=8)
             if pack.get("cover")
-            else ft.Icon(ft.Icons.IMAGE)
+            else ft.Icon(ft.Icons.IMAGE, size=48)
           ),
-
           # name and author
-          ft.Column(
-            controls=[
-              ft.Text(pack["name"]),
-              ft.Text(pack["author"]),
-            ]
-          )
-        ]
-      )
+          ft.Column([
+            ft.Text(pack["name"]),
+            ft.Text(pack["author"], size=12, opacity=0.6),
+            ft.Text("")
+          ], tight=True, spacing=0),
+        ]),
+        ft.Column([
+          # pack actions
+          ft.Row([
+            ft.IconButton(ft.Icons.EDIT),
+            ft.IconButton(ft.Icons.MENU),
+          ]),
+
+          # date
+          ft.Text(FormatDate(pack["date"]).label()),
+        ]),
+      ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
     )
 
   def _rebuild(self):
@@ -117,7 +163,12 @@ class AppMain():
         name.update()
         return
 
-      packs.append({"name": name.value.strip(), "author": author.value.strip() or "Unknown", "cover": cover[0] if cover else None})
+      packs.append({
+        "cover": cover[0] if cover else None,
+        "name": name.value.strip(),
+        "author": author.value.strip() or "Unknown",
+        "date": datetime.today()
+      })
       self.page.pop_dialog()
       self._rebuild()
 
