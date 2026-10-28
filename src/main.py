@@ -13,7 +13,15 @@ locale.setlocale(locale.LC_TIME, "") # set time to user's locale time
 
 # TODO: save and load implementation
 # NOTE: possibly do this in C++ so it gets executed faster
-packs: list[dict] = []
+packs: list[dict] = [
+  # test pack, remove before prod
+  {
+    "cover": None,
+    "name": "TEST PACK",
+    "author": "Unknown",
+    "date": datetime.today()
+  }
+]
 def save_packs():
   return
 
@@ -89,42 +97,54 @@ class AppMain():
       horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
     )
 
+    #NOTE: add SafeArea
     self.page.add(self.pack_column)
     self._rebuild()
 
   # ----------------------------------------------------
   def _layout(self, pack: dict) -> ft.Control:
     #TODO: add a apply button on the right of the card
+    #NOTE: possibly use ft.Stack
+
+    #TODO: improve the positioning of the cards  
     return ft.Container(
       padding=10,
       border_radius=8,
       bgcolor=wac.LIGHT_NUDE,
+      alignment=ft.Alignment.TOP_LEFT,
       content=ft.Row([
         ft.Row([
           # icon
-          (
-            ft.Image(src=pack["cover"], width=48, height=48, fit=ft.BoxFit.COVER, border_radius=8)
-            if pack.get("cover")
-            else ft.Icon(ft.Icons.IMAGE, size=48)
-          ),
+          ft.Image(src=pack["cover"], width=72, height=72, fit=ft.BoxFit.COVER, border_radius=8)
+          if pack.get("cover")
+          else ft.Icon(ft.Icons.IMAGE, size=72, ),
+
           # name and author
           ft.Column([
-            ft.Text(pack["name"]),
+            ft.Text(pack["name"], size=16),
             ft.Text(pack["author"], size=12, opacity=0.6),
-            ft.Text("")
+            ft.Container(height=12),
           ], tight=True, spacing=0),
-        ]),
+        ], spacing=10),
+
         ft.Column([
-          # pack actions
           ft.Row([
+            # pack actions
             ft.IconButton(ft.Icons.EDIT),
-            ft.IconButton(ft.Icons.MENU),
-          ]),
+            ft.ContextMenu(ft.IconButton(
+              icon=ft.Icons.MORE_VERT,
+              key="context_menu_trigger_area",
+              expand=True,
+            ), primary_items=[
+              ft.PopupMenuItem("Test1"),
+              ft.PopupMenuItem("Test2"),
+            ], primary_trigger=ft.ContextMenuTrigger.DOWN)
+          ], alignment=ft.MainAxisAlignment.END, vertical_alignment=ft.CrossAxisAlignment.START),
 
           # date
           ft.Text(FormatDate(pack["date"]).label()),
-        ]),
-      ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+        ], horizontal_alignment=ft.CrossAxisAlignment.END)
+      ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.START)
     )
 
   def _rebuild(self):
@@ -137,12 +157,16 @@ class AppMain():
 
   # ----------------------------------------------------
   async def create_pack(self, e: ft.Event[ft.Button] | None = None):
-    #TODO: fix "cover image" button sometimes not working
+    #TODO: improve the layout of the dialog
 
     name = ft.TextField(label="Pack name", autofocus=True)
     author = ft.TextField(label="Author")
     cover: list[str] = []
-    cover_holder = ft.Container(height=96, visible=False)
+    cover_holder = ft.Container(action=ft.PickFiles(
+      self.file_picker,
+      dialog_title="Choose cover image",
+      file_type=ft.FilePickerFileType.IMAGE
+    ), width=96, height=96, content=ft.Icon(ft.Icons.ACCOUNT_BOX_ROUNDED, size=96))
 
     def handle_result(e: ft.FilePickerResultEvent):
       if e.files and e.files[0].path:
@@ -152,7 +176,6 @@ class AppMain():
           src=e.files[0].path, width=96, height=96,
           fit=ft.BoxFit.COVER, border_radius=8,
         )
-        cover_holder.visible = True
         cover_holder.update()
 
     self.file_picker.on_result = handle_result
@@ -175,22 +198,19 @@ class AppMain():
     self.page.show_dialog(ft.AlertDialog(
       modal=True,
       title=ft.Text("Create Sticker Pack"),
+      content_padding=15,
+      title_padding=15,
+      # actions_padding=15,
       content=ft.Column([
         cover_holder,
-        ft.FilledTonalButton(
-          "Choose Cover",
-          action=ft.PickFiles(
-            self.file_picker,
-            dialog_title="Choose cover image",
-            file_type=ft.FilePickerFileType.IMAGE
-          )
-        ),
-        name, author
+        ft.Container(height=15),
+        name,
+        author
       ], tight=True),
       actions=[
         ft.TextButton("Cancel", on_click=lambda e: self.page.pop_dialog()),
         ft.FilledButton("Create", on_click=confirm)
-      ]
+      ],
     ))
 
 def main(page: ft.Page):
