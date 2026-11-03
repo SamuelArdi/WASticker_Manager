@@ -8,7 +8,6 @@ import locale
 locale.setlocale(locale.LC_TIME, "") # set time to user's locale time
 
 #NOTE: todo tomorrow:
-# - add apply button
 # - add new screen to edit the packs
 
 # TODO: save and load implementation
@@ -29,7 +28,7 @@ def load_packs():
   return
 
 class FormatDate:
-  WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednedsay", "Thursday", "Friday", "Saturday", "Saturday", "Sunday")
+  WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
   MONTH_NAMES = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
   def __init__(self, then: datetime, now: datetime | None = None, *, weekday_cutoff: int = 6) -> None:
@@ -71,44 +70,23 @@ class AppMain():
     self.page.window.resizable = False
     self.page.window.maximizable = False
 
-    # add pack button
-    self.page.floating_action_button = ft.FloatingActionButton(
-      icon=ft.Icons.ADD,
-      foreground_color=wac.TEA_GREEN,
-      bgcolor=wac.WA_LIGHT_GREEN,
-      content=ft.Text("Create Pack"),
-      on_click=self.create_pack
-    )
-
-    # topbar
-    self. page.appbar = ft.AppBar(
-      title=ft.Text("Sticker Packs", color=wac.TEA_GREEN),
-      leading=ft.IconButton(ft.Icons.MENU, icon_color=wac.TEA_GREEN),
-      bgcolor=wac.WA_LIGHT_GREEN,
-      adaptive=True,
-      actions=[
-        ft.IconButton(ft.Icons.SEARCH, icon_color=wac.TEA_GREEN),
-        ft.IconButton(ft.Icons.SETTINGS, icon_color=wac.TEA_GREEN)
-      ]
-    )
-
     self.pack_column = ft.Column(
       spacing=12,
       horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+      scroll=ft.ScrollMode.AUTO,
+      expand=True
     )
 
-    #NOTE: add SafeArea
-    self.page.add(self.pack_column)
-    self._rebuild()
+    self.page.on_route_change = self.route_change 
+    self.page.on_view_pop = self.view_pop
 
-  # ----------------------------------------------------
+    self.route_change()
+
+  # ---------------------------------------------------- page
   def _layout(self, pack: dict) -> ft.Control:
-    #TODO: add a apply button on the right of the card
-    #NOTE: possibly use ft.Stack
-
     #TODO: improve the positioning of the cards  
     return ft.Container(
-      padding=10,
+      padding=8,
       border_radius=8,
       bgcolor=wac.LIGHT_NUDE,
       alignment=ft.Alignment.TOP_LEFT,
@@ -117,7 +95,7 @@ class AppMain():
           # icon
           ft.Image(src=pack["cover"], width=72, height=72, fit=ft.BoxFit.COVER, border_radius=8)
           if pack.get("cover")
-          else ft.Icon(ft.Icons.IMAGE, size=72, ),
+          else ft.Icon(ft.Icons.IMAGE, size=72),
 
           # name and author
           ft.Column([
@@ -136,8 +114,9 @@ class AppMain():
               key="context_menu_trigger_area",
               expand=True,
             ), primary_items=[
-              ft.PopupMenuItem("Test1"),
-              ft.PopupMenuItem("Test2"),
+              #TODO: enable after building the feature
+              ft.PopupMenuItem("Apply", disabled=True),
+              ft.PopupMenuItem(ft.Text("Delete", color=ft.Colors.RED), disabled=True),
             ], primary_trigger=ft.ContextMenuTrigger.DOWN)
           ], alignment=ft.MainAxisAlignment.END, vertical_alignment=ft.CrossAxisAlignment.START),
 
@@ -153,10 +132,30 @@ class AppMain():
       if packs
       else [ft.Text("No packs yet, create a pack by pressing the + button.")]
     )
-    self.page.update()
 
-  # ----------------------------------------------------
-  async def create_pack(self, e: ft.Event[ft.Button] | None = None):
+  def _build_appbar(self) -> ft.AppBar:
+    return ft.AppBar(
+      title=ft.Text("Sticker Packs", color=wac.TEA_GREEN),
+      leading=ft.IconButton(ft.Icons.MENU, icon_color=wac.TEA_GREEN),
+      bgcolor=wac.WA_LIGHT_GREEN,
+      adaptive=True,
+      actions=[
+        ft.IconButton(ft.Icons.SEARCH, icon_color=wac.TEA_GREEN),
+        ft.IconButton(ft.Icons.SETTINGS, icon_color=wac.TEA_GREEN, on_click=lambda _: self.page.navigate("/settings"))
+      ]
+    )
+
+  def _build_fab(self) -> ft.FloatingActionButton:
+    return ft.FloatingActionButton(
+      icon=ft.Icon(ft.Icons.ADD),
+      foreground_color=wac.TEA_GREEN,
+      bgcolor=wac.WA_LIGHT_GREEN,
+      content=ft.Text("Create Pack"),
+      on_click=self.create_pack
+    )
+
+  # ---------------------------------------------------- function
+  def create_pack(self, e: ft.Event[ft.Button] | None = None):
     #TODO: improve the layout of the dialog
 
     name = ft.TextField(label="Pack name", autofocus=True)
@@ -180,7 +179,7 @@ class AppMain():
 
     self.file_picker.on_result = handle_result
 
-    async def confirm(e):
+    def confirm(e):
       if not (name.value or "").strip():
         name.error = ft.Text("Pack name is required")
         name.update()
@@ -194,6 +193,7 @@ class AppMain():
       })
       self.page.pop_dialog()
       self._rebuild()
+      self.page.update()
 
     self.page.show_dialog(ft.AlertDialog(
       modal=True,
@@ -212,6 +212,32 @@ class AppMain():
         ft.FilledButton("Create", on_click=confirm)
       ],
     ))
+
+  # ---------------------------------------------------- route changes
+  #TODO: add route change for navigation
+  #NOTE: add SafeArea
+  # self.page.add(self.pack_column)
+  def route_change(self, e: ft.RouteChangeEvent | None = None):
+    self.page.views.clear()
+    self.page.views.append(
+      ft.View(
+        route="/",
+        controls=[
+          ft.SafeArea(self.pack_column, expand=True)
+        ],
+        floating_action_button=self._build_fab(),
+        floating_action_button_location=ft.FloatingActionButtonLocation.END_FLOAT,
+        appbar=self._build_appbar()
+      )
+    )
+    self._rebuild()
+    self.page.update()
+
+  async def view_pop(self, e: ft.ViewPopEvent):
+    if e.view is not None and e.view in self.page.views:
+      self.page.views.remove(e.view)
+    if self.page.views:
+      await self.page.push_route(self.page.views[-1].route)
 
 def main(page: ft.Page):
   AppMain(page)
