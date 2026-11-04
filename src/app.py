@@ -1,7 +1,7 @@
 from backend import lib
 import colors as wac
 
-from views import HomeView, SettingsView
+from views import HomeView, SettingsView, EditView
 
 import flet as ft
 from datetime import datetime
@@ -12,14 +12,16 @@ class AppMain():
     self.page = page
 
     #TODO: replace with load_packs()
-    self.packs: list[dict] = [
-      {
-        "cover": None,
-        "name": "TEST PACK",
-        "author": "Unknown",
-        "date": datetime.today()
-      }
-    ]
+    # self.packs: list[dict] = [
+    #   {
+    #     "id": 0,
+    #     "cover": None,
+    #     "name": "TEST PACK",
+    #     "author": "Unknown",
+    #     "date": datetime.today()
+    #   }
+    # ]
+    self.packs: list[dict] = []
 
     # file picker service
     self.file_picker = ft.FilePicker()
@@ -27,7 +29,8 @@ class AppMain():
 
     self.routes = {
       "/": HomeView,
-      "/settings": SettingsView
+      "/settings": SettingsView,
+      "/edit": EditView
     }
     self.current_view = None
 
@@ -67,13 +70,15 @@ class AppMain():
         return
 
       self.packs.append({
+        "id": max((p["id"] for p in self.packs), default=-1) + 1,
         "cover": cover[0] if cover else None,
         "name": name.value.strip(),
         "author": author.value.strip() or "Unknown",
         "date": datetime.today()
       })
 
-      #TODO: save_packs()
+      #TODO: add save_packs()
+
       self.page.pop_dialog()
       if self.current_view is not None:
         self.current_view.rebuild()
