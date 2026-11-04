@@ -9,20 +9,17 @@ class BaseView:
     self.page = app.page
 
   # ---------------------------------------------------- page
-  def build_appbar(self, title: str, *, back: bool = False) -> ft.AppBar:
-    leading: ft.Control
-    actions: list[ft.Control]
-
+  def build_appbar(self, title: str, *, back: bool = False, actions: list[ft.Control] | None = None) -> ft.AppBar:
     if back:
       leading = ft.IconButton(
         ft.Icons.ARROW_BACK,
         icon_color=wac.TEA_GREEN,
         on_click=lambda _: self.page.navigate("/")
       )
-      actions = []
+      default_actions: list[ft.Control] = []
     else:
       leading = ft.IconButton(ft.Icons.MENU, icon_color=wac.TEA_GREEN)
-      actions = [
+      default_actions = [
         ft.IconButton(ft.Icons.SEARCH, icon_color=wac.TEA_GREEN),
         ft.IconButton(
           ft.Icons.SETTINGS,
@@ -32,11 +29,11 @@ class BaseView:
       ]
 
     return ft.AppBar(
-      title=ft.Text("Sticker Packs", color=wac.TEA_GREEN),
+      title=ft.Text(title, color=wac.TEA_GREEN),
       leading=leading,
       bgcolor=wac.WA_LIGHT_GREEN,
       adaptive=True,
-      actions=actions
+      actions=actions if actions is not None else default_actions
     )
   
   def build(self) -> ft.View:

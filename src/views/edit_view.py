@@ -26,11 +26,8 @@ class EditView(BaseView):
     if self.pack is None:
       return self._build_not_found()
 
-    name = ft.TextField(
-      label="Pack Name", value=self.pack["name"], autofocus=True
-    )
+    name = ft.TextField(label="Pack Name", value=self.pack["name"], autofocus=True)
     author = ft.TextField(label="Author", value=self.pack["author"])
-
     cover_holder = ft.Container(
       width=96,
       height=96,
@@ -68,11 +65,14 @@ class EditView(BaseView):
 
     # ---------------------------------------------------- actions
     def save(e=None):
+      if self.pack is None:
+        self.page.navigate("/")
+        return
       if not (name.value or "").strip():
         name.error = ft.Text("Pack name is required")
         name.update()
         return
-      
+
       self.pack["name"] = name.value.strip()
       self.pack["author"] = author.value.strip() or "Unknown"
       self.pack["cover"] = self._pending_cover
@@ -86,11 +86,13 @@ class EditView(BaseView):
       self.page.navigate("/")
 
     def delete(e=None):
+      assert self.pack is not None
+
       self.page.show_dialog(
         ft.AlertDialog(
           modal=True,
           title=ft.Text("Delete Pack?"),
-          content=ft.Text(f"{self.pack['name']} will be permanently removed."),
+          content=ft.Text(f"{self.pack.get('name')} will be permanently removed."),
           actions=[
             ft.TextButton(
               "Cancel",
@@ -108,21 +110,12 @@ class EditView(BaseView):
     # ---------------------------------------------------- view 
     return ft.View(
       route=self.route,
-      appbar=ft.AppBar(
-        leading=ft.IconButton(
-          ft.Icons.ARROW_BACK,
-          icon_color=wac.TEA_GREEN,
-          on_click=lambda _: self.page.navigate("/")
-        ),
-        title=ft.Text("Edit Pack", color=wac.TEA_GREEN),
-        bgcolor=wac.WA_LIGHT_GREEN,
-        adaptive=True,
+      appbar=self.build_appbar(
+        "Edit Pack", back=True,
         actions=[
           ft.IconButton(
-            ft.Icons.CHECK,
-            icon_color=wac.TEA_GREEN,
-            tooltip="Save",
-            on_click=save
+            ft.Icons.CHECK, icon_color=wac.TEA_GREEN,
+            tooltip="Save", on_click=save
           )
         ]
       ),

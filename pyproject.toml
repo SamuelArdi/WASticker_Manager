@@ -44,5 +44,4 @@ module = "main"
 path = "src"
 
 [tool.flet.android]
-extract_packages = ["backend"]
 split_per_abi = true

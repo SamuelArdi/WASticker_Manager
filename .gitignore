@@ -29,3 +29,8 @@ tests
 
 # CMake
 CMakeCache.txt
+
+# Native build artifacts
+src/native.dll
+src/native.so
+src/native.dylib

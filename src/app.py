@@ -1,4 +1,7 @@
-from backend import lib
+from native_loader import lib
+if lib is None:
+  print("Running without native backend")
+
 import colors as wac
 
 from views import HomeView, SettingsView, EditView
