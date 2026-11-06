@@ -42,7 +42,7 @@ class HomeView(BaseView):
         ft.Column([
           ft.Row([
             # pack actions
-            ft.IconButton(ft.Icons.EDIT, on_click=lambda _, p=pack: self.page.navigate(f"/edit?pack_id={p['id']}")),
+            ft.IconButton(ft.Icons.EDIT, on_click=lambda _, p=pack: self.page.navigate("/edit", pack_id=p['id'])),
             ft.ContextMenu(ft.IconButton(
               icon=ft.Icons.MORE_VERT,
               key="context_menu_trigger_area",

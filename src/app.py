@@ -1,14 +1,13 @@
+import colors as wac
 from native_loader import lib
 if lib is None:
   print("Running without native backend")
-
-import colors as wac
 
 from views import HomeView, SettingsView, EditView
 
 import flet as ft
 from datetime import datetime
-
+from urllib.parse import urlparse
 
 class AppMain():
   def __init__(self, page: ft.Page):
@@ -109,10 +108,12 @@ class AppMain():
   def route_change(self, e: ft.RouteChangeEvent | None = None):
     self.page.views.clear()
 
-    view_cls = self.routes.get(self.page.route, HomeView)
+    path = urlparse(self.page.route).path or "/"
+    view_cls = self.routes.get(path, HomeView)
+    print(f"[route] matched {view_cls.__name__} for {path!r}")
+
     self.current_view = view_cls(self)
     self.page.views.append(self.current_view.build())
-
     self.page.update()
 
   async def view_pop(self, e: ft.ViewPopEvent):

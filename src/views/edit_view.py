@@ -9,7 +9,8 @@ class EditView(BaseView):
   def __init__(self, app):
     super().__init__(app)
 
-    raw = self.page.query.get("pack_id")
+    raw = self.page.query.to_dict.get("pack_id")
+
     try:
       self.pack_id = int(raw) if raw is not None else None
     except (ValueError, TypeError):
@@ -23,6 +24,7 @@ class EditView(BaseView):
 
   # ---------------------------------------------------- build 
   def build(self) -> ft.View:
+    print(f"[EditView] build called, pack is None: self.pack is None")
     if self.pack is None:
       return self._build_not_found()
 
