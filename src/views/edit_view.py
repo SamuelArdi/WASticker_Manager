@@ -24,7 +24,6 @@ class EditView(BaseView):
 
   # ---------------------------------------------------- build 
   def build(self) -> ft.View:
-    print(f"[EditView] build called, pack is None: self.pack is None")
     if self.pack is None:
       return self._build_not_found()
 

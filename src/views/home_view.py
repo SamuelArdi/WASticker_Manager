@@ -2,7 +2,7 @@ import flet as ft
 import colors as wac
 
 from views.base import BaseView
-from utils import FormatDate
+from utils import format_date
 
 class HomeView(BaseView):
   route = "/"
@@ -45,7 +45,7 @@ class HomeView(BaseView):
             ft.IconButton(ft.Icons.EDIT, on_click=lambda _, p=pack: self.page.navigate("/edit", pack_id=p['id'])),
             ft.ContextMenu(ft.IconButton(
               icon=ft.Icons.MORE_VERT,
-              key="context_menu_trigger_area",
+              key=f"context_menu_{pack['id']}",
               expand=True,
             ), primary_items=[
               #TODO: enable after building the feature
@@ -55,7 +55,7 @@ class HomeView(BaseView):
           ], alignment=ft.MainAxisAlignment.END, vertical_alignment=ft.CrossAxisAlignment.START),
 
           # date
-          ft.Text(FormatDate(pack["date"]).label()),
+          ft.Text(format_date(pack["date"])),
         ], horizontal_alignment=ft.CrossAxisAlignment.END)
       ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, vertical_alignment=ft.CrossAxisAlignment.START)
     )

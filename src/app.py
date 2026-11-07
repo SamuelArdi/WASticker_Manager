@@ -1,4 +1,3 @@
-import colors as wac
 from native_loader import lib
 if lib is None:
   print("Running without native backend")
@@ -10,6 +9,12 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 class AppMain():
+  routes = {
+    "/": HomeView,
+    "/settings": SettingsView,
+    "/edit": EditView
+  }
+  
   def __init__(self, page: ft.Page):
     self.page = page
 
@@ -28,16 +33,9 @@ class AppMain():
     # file picker service
     self.file_picker = ft.FilePicker()
     self.page.services.append(self.file_picker)
-
-    self.routes = {
-      "/": HomeView,
-      "/settings": SettingsView,
-      "/edit": EditView
-    }
     self.current_view = None
 
     self.page.on_route_change = self.route_change 
-    self.page.on_view_pop = self.view_pop
 
     self.route_change()
 
@@ -61,7 +59,7 @@ class AppMain():
           src=e.files[0].path, width=96, height=96,
           fit=ft.BoxFit.COVER, border_radius=8,
         )
-        cover_holder.update()
+        if cover_holder.page: cover_holder.update()
 
     self.file_picker.on_result = handle_result
 
@@ -110,17 +108,16 @@ class AppMain():
 
     path = urlparse(self.page.route).path or "/"
     view_cls = self.routes.get(path, HomeView)
-    print(f"[route] matched {view_cls.__name__} for {path!r}")
 
     self.current_view = view_cls(self)
     self.page.views.append(self.current_view.build())
     self.page.update()
 
-  async def view_pop(self, e: ft.ViewPopEvent):
-    if e.view is not None and e.view in self.page.views:
-      self.page.views.remove(e.view)
-    if self.page.views:
-      await self.page.push_route(self.page.views[-1].route)
+  # async def view_pop(self, e: ft.ViewPopEvent):
+  #   if e.view is not None and e.view in self.page.views:
+  #     self.page.views.remove(e.view)
+  #   if self.page.views:
+  #     await self.page.push_route(self.page.views[-1].route)
     
   def edit_pack(self, pack):
     return

@@ -1,35 +1,29 @@
 from datetime import datetime
 
-class FormatDate:
-  WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-  MONTH_NAMES = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+WEEKDAY_NAMES = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+MONTH_NAMES = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
-  def __init__(self,
-               then: datetime,
-               now: datetime | None = None,
-               *,
-               weekday_cutoff: int = 6
-  ) -> None:
-    self.now = self._local_aware(now or datetime.now())
-    self.then = self._local_aware(then)
-    self.days = (self.now.date() - self.then.date()).days
-    self.weekday_cutoff = weekday_cutoff
+def _ensure_aware(dt: datetime) -> datetime:
+  return dt.astimezone()
 
-  def label(self) -> str:
-    if self.days < 0:
-      return "Just Now"
-    if self.days == 0:
-      return self._format_time(self.then)
-    if self.days == 1:
-      return "Yesterday"
-    if self.days <= self.weekday_cutoff:
-      return self.WEEKDAY_NAMES[self.then.weekday()]
-    if self.then.year == self.now.year:
-      return f"{self.MONTH_NAMES[self.then.month - 1]} {self.then.day}"
-    return f"{self.MONTH_NAMES[self.then.month - 1]} {self.then.day}, {self.then.year}"
+def format_date(
+  then: datetime,
+  now: datetime | None = None,
+  *,
+  weekday_cutoff: int = 6
+)-> str:
+  now = _ensure_aware(now or datetime.now())
+  then = _ensure_aware(then)
+  days = (now.date() - then.date()).days if now else (datetime.now().date() - then.date()).days
 
-  def _local_aware(self, dt: datetime) -> datetime:
-    return dt.astimezone()
-
-  def _format_time(self, dt: datetime) -> str:
-    return f"{dt.hour:02d}:{dt.minute:02d}"
+  if days < 0:
+    return "Just Now"
+  if days == 0:
+    return f"{then.hour:02d}:{then.minute:02d}"
+  if days == 1:
+    return "Yesterday"
+  if days <= weekday_cutoff:
+    return WEEKDAY_NAMES[then.weekday()]
+  if then.year == (now.year if now else datetime.now().year):
+    return f"{MONTH_NAMES[then.month - 1]} {then.day}"
+  return f"{MONTH_NAMES[then.month - 1]} {then.day}, {then.year}"
