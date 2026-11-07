@@ -51,18 +51,18 @@ class EditView(BaseView):
       )
     )
 
-    def handle_result(e: ft.FilePickerResultEvent):
-      if e.files and e.files[0].path:
-        self._pending_cover = e.files[0].path
-        cover_holder.content = ft.Image(
-          src=self._pending_cover,
-          width=96, height=96,
-          fit=ft.BoxFit.COVER,
-          border_radius=8,
-        )
+    def _on_cover_picked(path: str):
+      self._pending_cover = path
+      cover_holder.content = ft.Image(
+        src=path,
+        width=96,
+        height=96,
+        fit=ft.BoxFit.COVER,
+        border_radius=8
+      )
+      if cover_holder.page:
         cover_holder.update()
-    
-    self.app.file_picker.on_result = handle_result
+    self.app.pick_image(_on_cover_picked)
 
     # ---------------------------------------------------- actions
     def save(e=None):

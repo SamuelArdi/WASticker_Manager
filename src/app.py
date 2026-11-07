@@ -44,34 +44,35 @@ class AppMain():
   def create_pack(self, e: ft.Event[ft.Button] | None = None):
     name = ft.TextField(label="Pack name", autofocus=True)
     author = ft.TextField(label="Author")
-    cover: list[str] = []
+    cover_path: str | None = None
     cover_holder = ft.Container(action=ft.PickFiles(
       self.file_picker,
       dialog_title="Choose cover image",
       file_type=ft.FilePickerFileType.IMAGE
     ), width=96, height=96, content=ft.Icon(ft.Icons.ACCOUNT_BOX_ROUNDED, size=96))
 
-    def handle_result(e: ft.FilePickerResultEvent):
-      if e.files and e.files[0].path:
-        cover.clear()
-        cover.append(e.files[0].path)
-        cover_holder.content = ft.Image(
-          src=e.files[0].path, width=96, height=96,
-          fit=ft.BoxFit.COVER, border_radius=8,
-        )
-        if cover_holder.page: cover_holder.update()
-
-    self.file_picker.on_result = handle_result
+    def _on_cover_picked(path: str):
+      nonlocal cover_path
+      cover_path = path
+      cover_holder.content = ft.Image(
+        src=path,
+        width=96, height=96,
+        fit=ft.BoxFit.COVER,
+        border_radius=8
+      )
+      if cover_holder.page:
+        cover_holder.update()
+    self.pick_image(_on_cover_picked)
 
     def confirm(e):
       if not (name.value or "").strip():
-        name.error = ft.Text("Pack name is required")
+        name.error = "Pack name is required"
         name.update()
         return
 
       self.packs.append({
         "id": max((p["id"] for p in self.packs), default=-1) + 1,
-        "cover": cover[0] if cover else None,
+        "cover": cover_path,
         "name": name.value.strip(),
         "author": author.value.strip() or "Unknown",
         "date": datetime.today()
@@ -102,6 +103,12 @@ class AppMain():
       ],
     ))
 
+  def pick_image(self, on_picked):
+    def _handle(e: ft.FilePickerResultEvent):
+      if e.files and e.files[0].path:
+        on_picked(e.files[0].path)
+    self.file_picker.on_result = _handle
+
   # ---------------------------------------------------- routing
   def route_change(self, e: ft.RouteChangeEvent | None = None):
     self.page.views.clear()
@@ -112,12 +119,6 @@ class AppMain():
     self.current_view = view_cls(self)
     self.page.views.append(self.current_view.build())
     self.page.update()
-
-  # async def view_pop(self, e: ft.ViewPopEvent):
-  #   if e.view is not None and e.view in self.page.views:
-  #     self.page.views.remove(e.view)
-  #   if self.page.views:
-  #     await self.page.push_route(self.page.views[-1].route)
     
   def edit_pack(self, pack):
     return
