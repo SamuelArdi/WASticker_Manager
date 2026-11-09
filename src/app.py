@@ -1,28 +1,21 @@
-from native_loader import lib
-if lib is None:
-  print("Running without native backend")
-
-from views import HomeView, SettingsView, EditView
-
-import flet as ft
 from datetime import datetime
 from urllib.parse import urlparse
+
+import flet as ft
+
+from native_loader import lib
+from views import EditView, HomeView, SettingsView
+
+if lib is None:
+  print("Running without native backend")
 
 class AppMain():
 
   def __init__(self, page: ft.Page):
     self.page = page
 
-    #TODO: replace with load_packs()
-    # self.packs: list[dict] = [
-    #   {
-    #     "id": 0,
-    #     "cover": None,
-    #     "name": "TEST PACK",
-    #     "author": "Unknown",
-    #     "date": datetime.today()
-    #   }
-    # ]
+    #TODO: load_packs()
+
     self.packs: list[dict] = []
     self.routes = {
       "/": HomeView,
@@ -40,7 +33,6 @@ class AppMain():
     self.route_change()
 
   # ---------------------------------------------------- dialog: create pack
-  #TODO: improve the layout of the dialog
   def create_pack(self, e: ft.Event[ft.Button] | None = None):
     name = ft.TextField(label="Pack name", autofocus=True)
     author = ft.TextField(label="Author")
@@ -77,7 +69,7 @@ class AppMain():
         "cover": cover_path,
         "name": name.value.strip(),
         "author": author.value.strip() or "Unknown",
-        "date": datetime.today()
+        "date": datetime.now()
       })
 
       #TODO: add save_packs()

@@ -21,7 +21,7 @@ class EditView(BaseView):
 
     self._pending_cover = self.pack.get("cover") if self.pack else None
 
-  # ---------------------------------------------------- build 
+  # ---------------------------------------------------- build
   def build(self) -> ft.View:
     if self.pack is None:
       return self._build_not_found()
@@ -107,7 +107,7 @@ class EditView(BaseView):
           ]
         )
       )
-    # ---------------------------------------------------- view 
+    # ---------------------------------------------------- view
     return ft.View(
       route=self.route,
       appbar=self.build_appbar(
@@ -123,21 +123,32 @@ class EditView(BaseView):
         ft.SafeArea(
           ft.Column(
             [
-              ft.Container(height=8),
+              # pack cover
               ft.Row(
                 [cover_holder],
                 alignment=ft.MainAxisAlignment.CENTER
               ),
-              ft.Container(height=16),
-              name,
-              author,
+
+              # name and author textfield
+              ft.Row([
+                ft.Column([
+                  name,
+                  author
+                ]),
+              ], alignment=ft.MainAxisAlignment.CENTER),
+
+              #TODO: stickers here
+
+              # delete pack button
               ft.Container(height=24),
-              ft.TextButton(
-                "Delete pack",
-                icon=ft.Icons.DELETE_OUTLINE,
-                style=ft.ButtonStyle(color=ft.Colors.RED_600),
-                on_click=delete
-              )
+              ft.Row([
+                ft.TextButton(
+                  "Delete pack",
+                  icon=ft.Icons.DELETE_OUTLINE,
+                  style=ft.ButtonStyle(color=ft.Colors.RED_600),
+                  on_click=delete
+                )
+              ], alignment=ft.MainAxisAlignment.END)
             ],
             tight=True,
             spacing=12
