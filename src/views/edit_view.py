@@ -138,7 +138,7 @@ class EditView(BaseView):
                 ]),
               ], alignment=ft.MainAxisAlignment.CENTER),
 
-              #TODO: stickers here
+              #TODO: work on this tomorrow
 
               # delete pack button
               ft.Container(height=24),

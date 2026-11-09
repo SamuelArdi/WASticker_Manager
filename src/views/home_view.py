@@ -1,8 +1,9 @@
 import flet as ft
-import colors as wac
 
-from views.base import BaseView
+import colors as wac
 from utils import format_date
+from views.base import BaseView
+
 
 class HomeView(BaseView):
   route = "/"
@@ -16,9 +17,9 @@ class HomeView(BaseView):
       expand=True
     )
     self.rebuild()
-  
+
   def _layout(self, pack: dict) -> ft.Control:
-    #TODO: improve the positioning of the cards  
+    #TODO: improve the positioning of the cards
     return ft.Container(
       padding=8,
       border_radius=8,

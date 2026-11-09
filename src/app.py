@@ -9,8 +9,7 @@ from views import EditView, HomeView, SettingsView
 if lib is None:
   print("Running without native backend")
 
-class AppMain():
-
+class AppMain:
   def __init__(self, page: ft.Page):
     self.page = page
 

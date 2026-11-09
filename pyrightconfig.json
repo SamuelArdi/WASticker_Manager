@@ -1,0 +1,30 @@
+{
+  "include": ["src"],
+  "exclude": [
+    "**/__pycache__",
+    "**/node_modules",
+    ".venv",
+    "venv",
+    "env",
+    "build",
+    ".flet",
+    "native"
+  ],
+
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "basic",
+
+  "venvPath": ".",
+  "venv": ".venv",
+
+  "executionEnvironments": [
+    {
+      "root": "src",
+      "extraPaths": ["src"]
+    }
+  ],
+
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": false,
+  "reportAttributeAccessIssue": "warning"
+}
