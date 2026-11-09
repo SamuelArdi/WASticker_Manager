@@ -42,7 +42,7 @@ class AppMain():
         self.file_picker,
         dialog_title="Choose cover image",
         file_type=ft.FilePickerFileType.IMAGE
-      ), width=96, height=96, content=ft.Icon(ft.Icons.ACCOUNT_BOX_ROUNDED, size=96), padding=0)
+      ), width=96, height=96, content=ft.Icon(ft.Icons.IMAGE, size=96), padding=0)
     ], alignment=ft.MainAxisAlignment.CENTER, vertical_alignment=ft.CrossAxisAlignment.CENTER)
 
     def _on_cover_picked(path: str):
@@ -84,7 +84,6 @@ class AppMain():
       title=ft.Text("Create Sticker Pack"),
       content_padding=15,
       title_padding=15,
-      # actions_padding=15,
       content=ft.Column([
         cover_holder,
         ft.Container(height=15),
