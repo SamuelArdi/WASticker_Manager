@@ -3,7 +3,7 @@ import flet as ft
 from views.base import BaseView
 
 
-#NOTE: This is most likely last
+#NOTE: this will most likely be added last
 class SettingsView(BaseView):
   route = "/settings"
 
