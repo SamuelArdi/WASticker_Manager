@@ -8,7 +8,6 @@ class EditView(BaseView):
 
   def __init__(self, app):
     super().__init__(app)
-
     raw = self.page.query.to_dict.get("pack_id")
 
     try:

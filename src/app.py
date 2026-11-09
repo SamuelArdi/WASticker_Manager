@@ -9,12 +9,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 class AppMain():
-  routes = {
-    "/": HomeView,
-    "/settings": SettingsView,
-    "/edit": EditView
-  }
-  
+
   def __init__(self, page: ft.Page):
     self.page = page
 
@@ -29,13 +24,18 @@ class AppMain():
     #   }
     # ]
     self.packs: list[dict] = []
+    self.routes = {
+      "/": HomeView,
+      "/settings": SettingsView,
+      "/edit": EditView
+    }
 
     # file picker service
     self.file_picker = ft.FilePicker()
     self.page.services.append(self.file_picker)
     self.current_view = None
 
-    self.page.on_route_change = self.route_change 
+    self.page.on_route_change = self.route_change
 
     self.route_change()
 
@@ -45,16 +45,18 @@ class AppMain():
     name = ft.TextField(label="Pack name", autofocus=True)
     author = ft.TextField(label="Author")
     cover_path: str | None = None
-    cover_holder = ft.Container(action=ft.PickFiles(
-      self.file_picker,
-      dialog_title="Choose cover image",
-      file_type=ft.FilePickerFileType.IMAGE
-    ), width=96, height=96, content=ft.Icon(ft.Icons.ACCOUNT_BOX_ROUNDED, size=96))
+    cover_holder = ft.Row([
+      ft.Container(action=ft.PickFiles(
+        self.file_picker,
+        dialog_title="Choose cover image",
+        file_type=ft.FilePickerFileType.IMAGE
+      ), width=96, height=96, content=ft.Icon(ft.Icons.ACCOUNT_BOX_ROUNDED, size=96), padding=0)
+    ], alignment=ft.MainAxisAlignment.CENTER, vertical_alignment=ft.CrossAxisAlignment.CENTER)
 
     def _on_cover_picked(path: str):
       nonlocal cover_path
       cover_path = path
-      cover_holder.content = ft.Image(
+      cover_holder.controls[0] = ft.Image(
         src=path,
         width=96, height=96,
         fit=ft.BoxFit.COVER,
@@ -119,6 +121,6 @@ class AppMain():
     self.current_view = view_cls(self)
     self.page.views.append(self.current_view.build())
     self.page.update()
-    
+
   def edit_pack(self, pack):
     return
