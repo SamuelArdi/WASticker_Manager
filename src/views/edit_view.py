@@ -1,7 +1,8 @@
 import flet as ft
-import colors as wac
 
+import colors as wac
 from views.base import BaseView
+
 
 class EditView(BaseView):
   route = "/edit"
@@ -165,11 +166,13 @@ class EditView(BaseView):
       appbar=self.build_appbar("Edit Pack", back=True),
       controls=[
         ft.SafeArea(
-          ft.Column([
-            ft.Icon(ft.Icons.ERROR_OUTLINE, size=48),
-            ft.Text("Pack not found", size=16),
-            ft.Button("Back to home", on_click=lambda _: self.page.navigate("/")),
-          ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True),
+          ft.Row([
+            ft.Column([
+              ft.Icon(ft.Icons.ERROR_OUTLINE, size=48),
+              ft.Text("Pack not found", size=16),
+              ft.Button("Back to home", on_click=lambda _: self.page.navigate("/")),
+            ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True)
+          ], alignment=ft.MainAxisAlignment.CENTER),
           expand=True
         )
       ]
