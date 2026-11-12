@@ -22,6 +22,16 @@ class EditView(BaseView):
 
     self._pending_cover = self.pack.get("cover") if self.pack else None
 
+    self.stickers_row = ft.Row(
+      spacing=12,
+      expand=True,
+      wrap=True
+    )
+
+    self.stickers = ft.Column([
+      self.stickers_row
+    ], scroll=ft.ScrollMode.AUTO)
+
   # ---------------------------------------------------- build
   def build(self) -> ft.View:
     if self.pack is None:
@@ -120,6 +130,13 @@ class EditView(BaseView):
           )
         ]
       ),
+      floating_action_button=ft.FloatingActionButton(
+        icon=ft.Icons.ADD,
+        foreground_color=wac.TEA_GREEN,
+        bgcolor=wac.WA_LIGHT_GREEN,
+        content=ft.Text("Add Sticker"),
+        on_click=self.create_sticker
+      ),
       controls=[
         ft.SafeArea(
           ft.Column(
@@ -138,7 +155,7 @@ class EditView(BaseView):
                 ]),
               ], alignment=ft.MainAxisAlignment.CENTER),
 
-              #TODO: work on this tomorrow
+              self.stickers,
 
               # delete pack button
               ft.Container(height=24),
@@ -177,3 +194,8 @@ class EditView(BaseView):
         )
       ]
     )
+
+  # ---------------------------------------------------- create sticker
+  def create_sticker(self, e: ft.Event[ft.Button] | None = None):
+    print("Hello")
+    self.stickers_row.controls.append(ft.Icon(ft.Icons.CHECK))
