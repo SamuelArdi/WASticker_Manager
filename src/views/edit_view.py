@@ -22,15 +22,10 @@ class EditView(BaseView):
 
     self._pending_cover = self.pack.get("cover") if self.pack else None
 
-    self.stickers_row = ft.Row(
+    self.stickers = ft.Row(
       spacing=12,
-      expand=True,
-      wrap=True
+      wrap=True,
     )
-
-    self.stickers = ft.Column([
-      self.stickers_row
-    ], scroll=ft.ScrollMode.AUTO)
 
   # ---------------------------------------------------- build
   def build(self) -> ft.View:
@@ -155,6 +150,7 @@ class EditView(BaseView):
                 ]),
               ], alignment=ft.MainAxisAlignment.CENTER),
 
+              #TODO: fix the damn centering
               self.stickers,
 
               # delete pack button
@@ -169,7 +165,8 @@ class EditView(BaseView):
               ], alignment=ft.MainAxisAlignment.END)
             ],
             tight=True,
-            spacing=12
+            spacing=12,
+            scroll=ft.ScrollMode.AUTO
           ),
           expand=True
         )
@@ -197,5 +194,8 @@ class EditView(BaseView):
 
   # ---------------------------------------------------- create sticker
   def create_sticker(self, e: ft.Event[ft.Button] | None = None):
-    print("Hello")
-    self.stickers_row.controls.append(ft.Icon(ft.Icons.CHECK))
+    sticker_image = ft.Container(
+      width=96, height=96, content=ft.Icon(ft.Icons.IMAGE, size=96), padding=0
+    )
+
+    self.stickers.controls.append(sticker_image)
