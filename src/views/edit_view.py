@@ -1,4 +1,5 @@
 import flet as ft
+from _collections_abc import Callable
 
 import colors as wac
 from views.base import BaseView
@@ -151,6 +152,7 @@ class EditView(BaseView):
               ], alignment=ft.MainAxisAlignment.CENTER),
 
               #TODO: fix the damn centering
+              ft.Container(height=10),
               self.stickers,
 
               # delete pack button
@@ -194,8 +196,47 @@ class EditView(BaseView):
 
   # ---------------------------------------------------- create sticker
   def create_sticker(self, e: ft.Event[ft.Button] | None = None):
-    sticker_image = ft.Container(
-      width=96, height=96, content=ft.Icon(ft.Icons.IMAGE, size=96), padding=0
+    sticker_path: str | None = None
+    sticker_holder = ft.Container(
+      action=ft.PickFiles(
+        self.app.file_picker,
+        dialog_title="Choose sticker image",
+        file_type=ft.FilePickerFileType.IMAGE
+      ),
+      width=96, height=96,
+      content=ft.Icon(ft.Icons.IMAGE, size=96),
+      padding=0
     )
 
-    self.stickers.controls.append(sticker_image)
+    def _on_sticker_picked(path: str):
+      nonlocal sticker_path
+      sticker_path = path
+      sticker_holder.content = ft.Image(
+        src=path,
+        width=96, height=96,
+        fit=ft.BoxFit.COVER,
+        border_radius=8
+      )
+      if sticker_holder.page:
+        sticker_holder.update()
+    self.app.pick_image(_on_sticker_picked)
+
+    def confirm(e):
+      self.stickers.controls.append(sticker_holder)
+
+      self.page.pop_dialog()
+      if self.app.current_view is not None:
+        self.app.current_view.rebuild()
+      self.page.update()
+
+    self.page.show_dialog(ft.AlertDialog(
+      modal=True,
+      title=ft.Text("Add Sticker"),
+      content=ft.Row([
+        sticker_holder
+      ], alignment=ft.MainAxisAlignment.CENTER),
+      actions=[
+        ft.TextButton("Cancel", on_click=lambda _: self.page.pop_dialog()),
+        ft.FilledButton("Create", on_click=confirm)
+      ]
+    ))
