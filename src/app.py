@@ -10,6 +10,13 @@ if lib is None:
   print("Running without native backend")
 
 class AppMain:
+
+  MAX_PACKS: int = 25
+  MAX_STICKERS: int = 30
+
+  total_packs: int = 0
+  total_stickers: int = 0
+
   def __init__(self, page: ft.Page):
     self.page = page
 
@@ -33,6 +40,10 @@ class AppMain:
 
   # ---------------------------------------------------- dialog: create pack
   def create_pack(self, e: ft.Event[ft.Button] | None = None):
+    if self.total_packs >= self.MAX_PACKS:
+      self.page.show_dialog(ft.SnackBar(ft.Text("You've reached the maximum amount of packs available.")))
+      return
+
     name = ft.TextField(label="Pack name", autofocus=True)
     author = ft.TextField(label="Author")
     cover_path: str | None = None
@@ -64,12 +75,13 @@ class AppMain:
         return
 
       self.packs.append({
-        "id": max((p["id"] for p in self.packs), default=-1) + 1,
+        "id": self.total_packs,
         "cover": cover_path,
         "name": name.value.strip(),
         "author": author.value.strip() or "Unknown",
         "date": datetime.now()
       })
+      self.total_packs += 1
 
       #TODO: add save_packs()
 
