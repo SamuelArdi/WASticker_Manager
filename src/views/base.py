@@ -1,5 +1,5 @@
 import flet as ft
-import colors as wac
+from colors import WhatsApp as wac
 
 class BaseView:
   route: str = "/"
@@ -35,9 +35,9 @@ class BaseView:
       adaptive=True,
       actions=actions if actions is not None else default_actions
     )
-  
+
   def build(self) -> ft.View:
     raise NotImplementedError
-  
+
   def rebuild(self) -> None:
     pass

@@ -1,6 +1,6 @@
 import flet as ft
 
-import colors as wac
+from colors import WhatsApp as wac
 from utils import format_date
 from views.base import BaseView
 
