@@ -74,6 +74,11 @@ class AppMain:
         name.update()
         return
 
+      if len(name.value) < 3:
+        name.error = "Pack name cannot be shorter than 3"
+        name.update()
+        return
+
       self.packs.append({
         "id": self.total_packs,
         "cover": cover_path,
