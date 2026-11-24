@@ -1,13 +1,16 @@
+import sys
 from datetime import datetime
 from urllib.parse import urlparse
 
 import flet as ft
 
+from colors import Terminal as ttc
 from native_loader import lib
 from views import EditView, HomeView, SettingsView
 
 if lib is None:
-  print("Running without native backend")
+  print(f"{ttc.RED}Failed to find native backend (native.dll).{ttc.RESET}")
+  sys.exit() # system exits as native.dll is a core component
 
 class AppMain:
 
