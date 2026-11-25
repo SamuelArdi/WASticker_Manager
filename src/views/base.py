@@ -1,5 +1,7 @@
 import flet as ft
+
 from colors import WhatsApp as wac
+
 
 class BaseView:
   route: str = "/"

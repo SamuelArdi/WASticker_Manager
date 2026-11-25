@@ -1,7 +1,7 @@
 import flet as ft
-from _collections_abc import Callable
 
-import colors as wac
+from colors import Terminal as ttc
+from colors import WhatsApp as wac
 from views.base import BaseView
 
 
@@ -49,7 +49,7 @@ class EditView(BaseView):
           src=self.pack["cover"],
           width=96,
           height=96,
-          fit=ft.BoxFit.COVER,
+          fit=ft.BoxFit.FILL,
           border_radius=8
         )
         if self.pack.get("cover")
@@ -152,8 +152,9 @@ class EditView(BaseView):
               ], alignment=ft.MainAxisAlignment.CENTER),
 
               #TODO: fix the damn centering
+              #NOTE: adding wrap to Row breaks the fucking thing
               ft.Container(height=10),
-              self.stickers,
+              self.stickers
 
               # delete pack button
               ft.Container(height=24),
@@ -195,20 +196,45 @@ class EditView(BaseView):
     )
 
   # ---------------------------------------------------- create sticker
-  def create_sticker(self, e: ft.Event[ft.Button] | None = None):
+  async def create_sticker(self, e: ft.Event[ft.Button] | None = None):
     if self.app.total_stickers >= self.app.MAX_STICKERS:
       self.page.show_dialog(ft.SnackBar(ft.Text("You've reached the maximum amount of stickers available.")))
       return
 
-    #TODO: prompt file picker instead of alert dialog
-    sticker_path: str | None = None
-    ft.PickFiles(
-      self.app.file_picker,
-      dialog_title="Choose image",
-      file_type=ft.FilePickerFileType.IMAGE
-    )
+    def add_sticker(image_path: str):
+      self.stickers.controls.append(
+        ft.Stack(
+          width=96, height=96,
+          controls=[
+            ft.Image(
+              src=image_path,
+              error_content=ft.Icon(ft.Icons.IMAGE),
+              fit=ft.BoxFit.FILL
+            ),
+            ft.Row(
+              alignment=ft.MainAxisAlignment.END,
+              controls=[
+                ft.IconButton(
+                  ft.Icons.MORE_HORIZ,
+                  icon_size=24,
+                  bgcolor=wac.TEA_GREEN
+                )
+              ]
+            )
+          ]
+        )
+      )
 
-    def _on_sticker_picked(path: str):
-      nonlocal sticker_path
-      sticker_path = path
-    self.app.pick_image(_on_sticker_picked)
+    try:
+      image = await ft.FilePicker().pick_files(
+        dialog_title="Select an image",
+        file_type=ft.FilePickerFileType.IMAGE,
+        allow_multiple=False
+      )
+      if image and image[0].path:
+        add_sticker(image[0].path)
+      else:
+        self.page.show_dialog(ft.SnackBar(ft.Text("Failed to add image as sticker.")))
+    except RuntimeError:
+      print(f"{ttc.RED}[EditView] RuntimeError, skipping file picker{ttc.RESET}")
+      self.page.show_dialog(ft.SnackBar(ft.Text("Failed to open image picker.")))
