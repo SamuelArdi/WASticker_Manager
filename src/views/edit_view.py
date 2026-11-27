@@ -17,7 +17,7 @@ class EditView(BaseView):
     except (ValueError, TypeError):
       self.pack_id = None
 
-    self.pack = next(
+    self.pack: dict | None = next(
       (p for p in app.packs if p["id"] == self.pack_id), None
     ) if self.pack_id is not None else None
 
@@ -154,7 +154,7 @@ class EditView(BaseView):
               #TODO: fix the damn centering
               #NOTE: adding wrap to Row breaks the fucking thing
               ft.Container(height=10),
-              self.stickers
+              self.stickers,
 
               # delete pack button
               ft.Container(height=24),
@@ -196,6 +196,7 @@ class EditView(BaseView):
     )
 
   # ---------------------------------------------------- create sticker
+  #TODO: fix sticker not filling the container
   async def create_sticker(self, e: ft.Event[ft.Button] | None = None):
     if self.app.total_stickers >= self.app.MAX_STICKERS:
       self.page.show_dialog(ft.SnackBar(ft.Text("You've reached the maximum amount of stickers available.")))
@@ -203,25 +204,31 @@ class EditView(BaseView):
 
     def add_sticker(image_path: str):
       self.stickers.controls.append(
-        ft.Stack(
+        ft.Container(
           width=96, height=96,
-          controls=[
-            ft.Image(
-              src=image_path,
-              error_content=ft.Icon(ft.Icons.IMAGE),
-              fit=ft.BoxFit.FILL
-            ),
-            ft.Row(
-              alignment=ft.MainAxisAlignment.END,
-              controls=[
-                ft.IconButton(
-                  ft.Icons.MORE_HORIZ,
-                  icon_size=24,
-                  bgcolor=wac.TEA_GREEN
-                )
-              ]
-            )
-          ]
+          blend_mode=ft.BlendMode.CLEAR,
+          border=ft.Border.all(1),
+          border_radius=6,
+          content=ft.Stack(
+            clip_behavior=ft.ClipBehavior.NONE,
+            controls=[
+              ft.Image(
+                src=image_path,
+                error_content=ft.Icon(ft.Icons.IMAGE),
+                fit=ft.BoxFit.FILL
+              ),
+              ft.Row(
+                alignment=ft.MainAxisAlignment.END,
+                controls=[
+                  ft.IconButton(
+                    ft.Icons.MORE_HORIZ,
+                    icon_size=24,
+                    bgcolor=wac.TEA_GREEN,
+                  )
+                ]
+              )
+            ]
+          )
         )
       )
 
@@ -235,6 +242,13 @@ class EditView(BaseView):
         add_sticker(image[0].path)
       else:
         self.page.show_dialog(ft.SnackBar(ft.Text("Failed to add image as sticker.")))
+
+      if self.pack is None:
+        print(f"{ttc.RED}[EditView], self.pack is None")
+        return
+
+      #TODO: add proper implementation of ID
+      self.pack["ID"] = "YE ID"
     except RuntimeError:
       print(f"{ttc.RED}[EditView] RuntimeError, skipping file picker{ttc.RESET}")
       self.page.show_dialog(ft.SnackBar(ft.Text("Failed to open image picker.")))
